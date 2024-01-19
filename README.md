@@ -1,1 +1,3 @@
-# dotfiles
+# .files
+
+Config files for different tools
