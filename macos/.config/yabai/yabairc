@@ -43,31 +43,39 @@
 # echo "yabai configuration loaded.."
 
 yabai -m config layout bsp
+yabai -m window_zoom_persist on
 
 # New window spawns to the right if vertical split, or bottom if horizontal split
 yabai -m config window_placement second_child
 
 # Paddings
-yabai -m config top_padding 1
-yabai -m config bottom_padding 1
-yabai -m config left_padding 1
-yabai -m config right_padding 1
-yabai -m config window_gap 1
+yabai -m config top_padding 2
+yabai -m config bottom_padding 4
+yabai -m config left_padding 4
+yabai -m config right_padding 4
+yabai -m config window_gap 4
 
 # center mouse on window with focus
 yabai -m config mouse_follows_focus on
+yabai -m focus_follows_mouse on
 # modifier for clicking and dragging with mouse
-yabai -m config mouse_modifier alt
+yabai -m config mouse_modifier ctrl
 # set modifier + left-click drag to move window
 yabai -m config mouse_action1 move
 # set modifier + right-click drag to resize window
 yabai -m config mouse_action2 resize
 
-# when window is dropped in center of another window, swap them (on edges it will split it)
-yabai -m mouse_drop_action swap
+# when window is dropped in center of another window
+yabai -m config mouse_drop_action stack
 
 # ignore these apps
 yabai -m rule --add app="^System Settings$" manage=off
 yabai -m rule --add app="^Calculator$" manage=off
 yabai -m rule --add app="^Karabiner-Elements$" manage=off
+yabai -m rule --add app="^zoom.us$" manage=off
+yabai -m rule --add app="qBittorrent" manage=off
+yabai -m rule --add app="NordVPN" manage=off
 
+# make first and last spaces to float
+yabai -m config --space 1 layout float
+yabai -m config --space 10 layout float

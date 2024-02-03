@@ -45,8 +45,8 @@ shift + alt - s : yabai -m window --display west; yabai -m display --focus west;
 shift + alt - g : yabai -m window --display east; yabai -m display --focus east;
 
 #move window to prev and next space
-shift + alt - p : yabai -m window --space prev;
-shift + alt - n : yabai -m window --space next;
+# shift + alt - p : yabai -m window --space prev;
+# shift + alt - n : yabai -m window --space next;
 
 # move window to space #
 shift + alt - 1 : yabai -m window --space 1;
@@ -56,6 +56,32 @@ shift + alt - 4 : yabai -m window --space 4;
 shift + alt - 5 : yabai -m window --space 5;
 shift + alt - 6 : yabai -m window --space 6;
 shift + alt - 7 : yabai -m window --space 7;
+shift + alt - 8 : yabai -m window --space 8;
+shift + alt - 9 : yabai -m window --space 9;
+
+# move focus to the window
+shift + ctrl - 1 : yabai -m window --focus first;
+shift + ctrl - 2 : yabai -m window --focus first; yabai -m window --focus next;
+shift + ctrl - 3 : yabai -m window --focus first; yabai -m window --focus next; yabai -m window --focus next;
+shift + ctrl - 4 : yabai -m window --focus first; yabai -m window --focus next; yabai -m window --focus next; yabai -m window --focus next;
+shift + ctrl - 5 : yabai -m window --focus first; yabai -m window --focus next; yabai -m window --focus next; yabai -m window --focus next; yabai -m window --focus next;
+shift + ctrl - 6 : yabai -m window --focus first; yabai -m window --focus next; yabai -m window --focus next; yabai -m window --focus next; yabai -m window --focus next; yabai -m window --focus next;
+
+# Move to next and previous window
+# shift + alt - n : if [ "$(yabai -m query --spaces --space | jq -r '.type')" = "stack" ]; then (yabai -m window --focus stack.next || yabai -m window --focus stack.first); else yabai -m window --focus next || yabai -m window --focus first; fi
+# shift + alt - p : if [ "$(yabai -m query --spaces --space | jq -r '.type')" = "stack" ]; then (yabai -m window --focus stack.prev || yabai -m window --focus stack.last); else yabai -m window --focus prev || yabai -m window --focus last; fi
+
+shift + alt - n : yabai -m query --spaces --space \
+  | jq -re ".index" \
+  | xargs -I{} yabai -m query --windows --space {} \
+  | jq -sre 'add | map(select(."is-minimized"==false)) | sort_by(.display, .frame.y, .frame.x, .id) | . as $array | length as $array_length | index(map(select(."has-focus"==true))) as $has_index | if $has_index > 0 then nth($has_index - 1).id else nth($array_length - 1).id end' \
+  | xargs -I{} yabai -m window --focus {}
+
+shift + alt - p : yabai -m query --spaces --space \
+  | jq -re ".index" \
+  | xargs -I{} yabai -m query --windows --space {} \
+  | jq -sre 'add | map(select(."is-minimized"==false)) | sort_by(.display, .frame.y, .frame.x, .id) | . as $array | length as $array_length | index(map(select(."has-focus"==true))) as $has_index | if $array_length - 1 > $has_index then nth($has_index + 1).id else nth(0).id end' \
+  | xargs -I{} yabai -m window --focus {}
 
 # ################################################################ #
 # THE FOLLOWING IS AN EXPLANATION OF THE GRAMMAR THAT SKHD PARSES. #

@@ -48,4 +48,4 @@ alias reload='exec fish'
 
 # Android
 alias ae='/Users/zubko/Library/Android/sdk/emulator/emulator -avd _Pixel_5_API_33 -dns-server 8.8.8.8'
-alias amenu='adb shell input keyevent 82'
+alias menu='adb shell input keyevent 82'
