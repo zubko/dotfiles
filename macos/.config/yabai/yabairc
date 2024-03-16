@@ -75,6 +75,7 @@ yabai -m rule --add app="^Karabiner-Elements$" manage=off
 yabai -m rule --add app="^zoom.us$" manage=off
 yabai -m rule --add app="qBittorrent" manage=off
 yabai -m rule --add app="NordVPN" manage=off
+yabai -m rule --add app="qemu-system-aarch64" manage=off
 
 # make first and last spaces to float
 yabai -m config --space 1 layout float
