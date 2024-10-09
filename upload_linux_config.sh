@@ -27,7 +27,7 @@ if [ "$confirm" != "y" ] && [ -n "$confirm" ]; then
     exit 1
 fi
 
-git commit -m "update config"
+git commit -m "update Linux config"
 git push
 
 exit 0
