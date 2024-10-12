@@ -14,11 +14,15 @@ git pull
 
 echo "Copying dotfiles to this folder..."
 
-dotfiles=(".tmux.conf" ".gitconfig" ".bash_aliases" ".vimrc")
+cp -r -v ~/.tmux.conf linux/
+cp -r -v ~/.gitconfig linux/
+cp -r -v ~/.bash_aliases linux/
+cp -r -v ~/.vimrc linux/
 
-for file in "${dotfiles[@]}"; do
-    cp -r -v ~/"$file" ./linux/
-done
+mkdir -p linux/.config
+
+cp -r -v ~/.config/nvim linux/.config/
+rm -rf linux/.config/nvim/.netrwhist
 
 echo "The new changes:"
 

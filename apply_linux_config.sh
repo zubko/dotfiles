@@ -14,4 +14,4 @@ git pull
 
 # copy configs
 echo "Copying dotfiles from this folder..."
-cp -R -f -v linux/. ~/
+rsync -av --update --include=".*" ./linux/ ~/
