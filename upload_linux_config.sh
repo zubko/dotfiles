@@ -14,7 +14,7 @@ git pull
 
 echo "Copying dotfiles to this folder..."
 
-dotfiles=(".tmux.conf" ".gitconfig" ".bash_aliases")
+dotfiles=(".tmux.conf" ".gitconfig" ".bash_aliases" ".vimrc")
 
 for file in "${dotfiles[@]}"; do
     cp -r -v ~/"$file" ./linux/
