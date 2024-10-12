@@ -11,10 +11,14 @@ fi
 echo "Getting the latest changes from Git repo..."
 
 git pull
-    
+
 echo "Copying dotfiles to this folder..."
 
-cp -r ~/.tmux.conf ./linux/
+dotfiles=(".tmux.conf" ".gitconfig" ".bash_aliases")
+
+for file in "${dotfiles[@]}"; do
+    cp -r -v ~/"$file" ./linux/
+done
 
 echo "The new changes:"
 
@@ -31,4 +35,3 @@ git commit -m "update Linux config"
 git push
 
 exit 0
-

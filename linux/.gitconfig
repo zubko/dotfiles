@@ -1,0 +1,7 @@
+[user]
+	email = alexander.zubko@gmail.com
+	name = zubko
+[pull]
+	rebase = false
+[diff]
+    external = difft
