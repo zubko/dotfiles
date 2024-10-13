@@ -15,3 +15,4 @@ git pull
 # copy configs
 echo "Copying dotfiles from this folder..."
 rsync -av --update --include=".*" ./linux/ ~/
+
