@@ -1,5 +1,9 @@
 #!/bin/bash
 
+# TODO: this is an old way, there is no need to copy the files
+# they can be sym-linked to this repo at their locations
+# check linux/setup.sh
+
 current_dir=$(basename "$(pwd)")
 
 if [ "$current_dir" != "dotfiles" ]; then
@@ -20,9 +24,6 @@ cp -r -v ~/.bash_aliases linux/
 cp -r -v ~/.vimrc linux/
 
 mkdir -p linux/.config
-
-cp -r -v ~/.config/nvim linux/.config/
-rm -rf linux/.config/nvim/.netrwhist
 
 echo "The new changes:"
 
