@@ -23,6 +23,7 @@ fi
 # 2. brew deps
 command -v brew >/dev/null || { echo "Homebrew required"; exit 1; }
 command -v fnm  >/dev/null || brew install fnm
+command -v eza  >/dev/null || brew install eza
 
 # 3. external plugins (HTTPS so no SSH key is needed; bash-3.2-safe, no arrays)
 mkdir -p "$CUSTOM/plugins" "$CUSTOM/themes"

@@ -37,9 +37,17 @@ export BUN_INSTALL="$HOME/.bun"
 export PATH="$BUN_INSTALL/bin:$PATH"
 [ -s "$HOME/.bun/_bun" ] && source "$HOME/.bun/_bun"
 
+# --- ls: eza with Nerd Font icons (falls back to plain ls if eza is absent) ---
+if command -v eza >/dev/null; then
+  alias ls='eza --icons --group-directories-first'
+  alias l='eza -la --icons --git --group-directories-first'
+  alias lt='eza --tree --level=2 --icons'
+else
+  alias ls='ls -a'
+  alias l='ls -la'
+fi
+
 # --- aliases ---
-alias ls='ls -a'
-alias l='ls'
 alias python='python3'
 alias pip='pip3'
 alias p='pnpm'
