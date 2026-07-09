@@ -1,0 +1,8 @@
+# revdiff keybindings overrides — merged over the built-in defaults.
+# Export the full effective set with `revdiff --dump-keys`.
+
+# Free ctrl+e for the standard readline "move to end of line" while editing
+# an annotation, and move the external-editor handoff to ctrl+g (the common
+# "edit in $EDITOR" binding). See umputun/revdiff#190.
+unmap ctrl+e
+map ctrl+g open_editor
