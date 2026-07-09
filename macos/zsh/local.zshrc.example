@@ -1,0 +1,50 @@
+# Machine-local zsh config — NOT tracked in git.
+# install.sh appends the "source shared.zshrc" block automatically; put
+# machine-only lines ABOVE that block. Below is the work-machine sample —
+# copy the bits that apply to a given machine into its real ~/.zshrc.
+
+# --- Java / Android (only where installed) ---
+export JAVA_HOME=/Library/Java/JavaVirtualMachines/zulu-17.jdk/Contents/Home
+export ANDROID_HOME="$HOME/Library/Android/sdk"
+export PATH="$PATH:$ANDROID_HOME/emulator:$ANDROID_HOME/platform-tools"
+
+# --- gcloud ---
+[ -f "$HOME/google-cloud-sdk/path.zsh.inc" ] && . "$HOME/google-cloud-sdk/path.zsh.inc"
+[ -f "$HOME/google-cloud-sdk/completion.zsh.inc" ] && . "$HOME/google-cloud-sdk/completion.zsh.inc"
+
+# --- work: Orca / slate ---
+alias s='cd ~/orca/slate'
+alias s1='cd ~/orca/slate'
+alias s2='cd ~/orca/slate-2'
+alias s3='cd ~/orca/slate-3'
+
+native() {
+    if [[ "$PWD" == *"/slate-3"* ]]; then
+        echo "Going to slate-3 native..."
+        cd ~/orca/slate-3/packages/native
+    elif [[ "$PWD" == *"/slate-2"* ]]; then
+        echo "Going to slate-2 native..."
+        cd ~/orca/slate-2/packages/native
+    else
+        echo "Going to slate native..."
+        cd ~/orca/slate/packages/native
+    fi
+}
+functions() {
+    if [[ "$PWD" == *"/slate-3"* ]]; then
+        echo "Going to slate-3 functions..."
+        cd ~/orca/slate-3/packages/firebase/functions
+    elif [[ "$PWD" == *"/slate-2"* ]]; then
+        echo "Going to slate-2 functions..."
+        cd ~/orca/slate-2/packages/firebase/functions
+    else
+        echo "Going to slate functions..."
+        cd ~/orca/slate/packages/firebase/functions
+    fi
+}
+alias na='native'
+alias fu='functions'
+
+alias amenu='adb shell input keyevent KEYCODE_MENU'
+alias aclean='cd android && ./gradlew clean && cd ..'
+alias ashot='adb exec-out screencap -p > ~/Desktop/screenshot_$(date +%Y%m%d_%H%M%S).png'
