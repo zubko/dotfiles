@@ -4,7 +4,9 @@
 # Also surfaces local-only lines you might want to promote into shared.zshrc.
 set -euo pipefail
 
-cd "$HOME/dotfiles"
+# Repo root = two levels up from this script (<clone>/macos/zsh/collect.sh),
+# so the dotfiles clone can live anywhere (~/dotfiles, ~/private/dotfiles, ...).
+cd "$(cd "$(dirname "${BASH_SOURCE[0]:-$0}")/../.." && pwd)"
 
 echo "Pulling latest..."
 git pull --rebase

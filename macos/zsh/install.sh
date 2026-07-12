@@ -4,14 +4,15 @@
 # Safe to re-run.
 set -euo pipefail
 
-REPO="$HOME/dotfiles"
-ZDIR="$REPO/macos/zsh"
+# Repo dir = wherever this script lives (<clone>/macos/zsh), so the dotfiles clone
+# can sit anywhere: ~/dotfiles, ~/private/dotfiles, ...
+ZDIR="$(cd "$(dirname "${BASH_SOURCE[0]:-$0}")" && pwd)"
 OMZ="$HOME/.oh-my-zsh"
 CUSTOM="${ZSH_CUSTOM:-$OMZ/custom}"
 TS="$(date +%Y%m%d_%H%M%S)"
 
 [ "$(uname)" = "Darwin" ] || { echo "macOS only"; exit 1; }
-[ -f "$ZDIR/shared.zshrc" ] || { echo "Run after cloning dotfiles to ~/dotfiles"; exit 1; }
+[ -f "$ZDIR/shared.zshrc" ] || { echo "install.sh must live in the dotfiles macos/zsh/ dir"; exit 1; }
 
 # 1. oh-my-zsh  (--keep-zshrc: do NOT let the installer overwrite ~/.zshrc)
 if [ ! -d "$OMZ" ]; then
@@ -58,7 +59,7 @@ add_source() {  # $1 = rc file, $2 = shared file
   if ! grep -q "dotfiles shared (managed" "$rc" 2>/dev/null; then
     {
       echo ""
-      echo "# >>> dotfiles shared (managed by ~/dotfiles/macos/zsh/install.sh) >>>"
+      echo "# >>> dotfiles shared (managed by macos/zsh/install.sh) >>>"
       echo "[ -f \"$shared\" ] && source \"$shared\""
       echo "# <<< dotfiles shared <<<"
     } >> "$rc"
