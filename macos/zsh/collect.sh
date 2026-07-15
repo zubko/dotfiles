@@ -9,7 +9,7 @@ set -euo pipefail
 cd "$(cd "$(dirname "${BASH_SOURCE[0]:-$0}")/../.." && pwd)"
 
 echo "Pulling latest..."
-git pull --rebase
+git pull --no-rebase
 
 echo
 echo "--- Local lines OUTSIDE the managed block ---"
