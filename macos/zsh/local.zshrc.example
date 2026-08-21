@@ -18,29 +18,29 @@ alias s1='cd ~/orca/slate'
 alias s2='cd ~/orca/slate-2'
 alias s3='cd ~/orca/slate-3'
 
+# Walk up from $PWD to the slate root. Matches any checkout or worktree.
+_slate_root() {
+    local dir="$PWD"
+    while [[ "$dir" == /*/* ]]; do
+        if [[ -d "$dir/packages/native" && -d "$dir/packages/firebase/functions" ]]; then
+            print -r -- "$dir"
+            return 0
+        fi
+        dir="${dir:h}"
+    done
+    return 1
+}
+_slate_cd() {
+    local sub="$1" root
+    root="$(_slate_root)" || root="$HOME/orca/slate"
+    echo "Going to ${root:t} ${sub:t}..."
+    cd "$root/$sub"
+}
 native() {
-    if [[ "$PWD" == *"/slate-3"* ]]; then
-        echo "Going to slate-3 native..."
-        cd ~/orca/slate-3/packages/native
-    elif [[ "$PWD" == *"/slate-2"* ]]; then
-        echo "Going to slate-2 native..."
-        cd ~/orca/slate-2/packages/native
-    else
-        echo "Going to slate native..."
-        cd ~/orca/slate/packages/native
-    fi
+    _slate_cd packages/native
 }
 functions() {
-    if [[ "$PWD" == *"/slate-3"* ]]; then
-        echo "Going to slate-3 functions..."
-        cd ~/orca/slate-3/packages/firebase/functions
-    elif [[ "$PWD" == *"/slate-2"* ]]; then
-        echo "Going to slate-2 functions..."
-        cd ~/orca/slate-2/packages/firebase/functions
-    else
-        echo "Going to slate functions..."
-        cd ~/orca/slate/packages/firebase/functions
-    fi
+    _slate_cd packages/firebase/functions
 }
 alias na='native'
 alias fu='functions'
