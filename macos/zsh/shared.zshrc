@@ -56,8 +56,9 @@ alias y='yarn'
 alias z='zed'
 alias c='claude'
 
-# --- AI / telemetry opt-out ---
+# --- Claude Code ---
 export CLAUDE_CODE_DISABLE_FEEDBACK_SURVEY=1
+export CLAUDE_CODE_DISABLE_NONESSENTIAL_TRAFFIC=1
+export CLAUDE_CODE_ENABLE_TODO_TOOLS=1
 export DISABLE_TELEMETRY=1
 export DO_NOT_TRACK=1
-export CLAUDE_CODE_DISABLE_NONESSENTIAL_TRAFFIC=1
