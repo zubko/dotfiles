@@ -56,6 +56,40 @@ alias y='yarn'
 alias z='zed'
 alias c='claude'
 
+# --- functions ---
+
+# `yarn start` fails with EADDRINUSE when a stale Metro packager holds the port.
+yarn() {
+  local a prev='' port='' dir=$PWD is_start=0
+  for a in "$@"; do
+    [[ $a == start || $a == start:* ]] && is_start=1
+    [[ $a == --port=* ]] && port=${a#--port=}
+    [[ $prev == --port ]] && port=$a
+    [[ $a == --cwd=* ]] && dir=${a#--cwd=}
+    [[ $prev == --cwd ]] && dir=$a
+    prev=$a
+  done
+  if (( is_start )); then
+    if [[ -z $port ]] && grep -q '"react-native":' "$dir/package.json" 2>/dev/null; then
+      port=8081
+    fi
+    if [[ $port == <-> ]]; then
+      local pids
+      pids=$(lsof -ti tcp:$port -sTCP:LISTEN 2>/dev/null)
+      if [[ -n $pids ]]; then
+        print "[zsh] port $port is busy — killing PID(s): ${pids//$'\n'/ }"
+        print -r -- "$pids" | xargs kill 2>/dev/null
+        local i
+        for i in {1..20}; do
+          lsof -ti tcp:$port -sTCP:LISTEN >/dev/null 2>&1 || break
+          sleep 0.1
+        done
+      fi
+    fi
+  fi
+  command yarn "$@"
+}
+
 # --- Claude Code ---
 export CLAUDE_CODE_DISABLE_FEEDBACK_SURVEY=1
 export CLAUDE_CODE_DISABLE_NONESSENTIAL_TRAFFIC=1
