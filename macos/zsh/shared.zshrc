@@ -1,17 +1,24 @@
 # Shared zsh config (macOS) — git: ~/dotfiles/macos/zsh/shared.zshrc
 # Sourced from ~/.zshrc. Machine-specific settings stay in ~/.zshrc itself.
+# This file is re-sourced by auto-reload.zsh, from inside a function:
+# top-level `typeset` must always use -g here.
 
-# --- oh-my-zsh ---
-export ZSH="$HOME/.oh-my-zsh"
-ZSH_THEME="alex"
-plugins=(
-  git
-  zsh-autosuggestions
-  history-substring-search
-  zsh-syntax-highlighting
-  zsh-npm-scripts-autocomplete
-)
-[ -f "$ZSH/oh-my-zsh.sh" ] && source "$ZSH/oh-my-zsh.sh"
+typeset -g _dotfiles_shared_rc=${(%):-%N}
+
+# --- oh-my-zsh (once per shell: omz is not safe to re-source) ---
+if (( ! ${+_dotfiles_omz_loaded} )); then
+  typeset -g _dotfiles_omz_loaded=1
+  export ZSH="$HOME/.oh-my-zsh"
+  ZSH_THEME="alex"
+  plugins=(
+    git
+    zsh-autosuggestions
+    history-substring-search
+    zsh-syntax-highlighting
+    zsh-npm-scripts-autocomplete
+  )
+  [ -f "$ZSH/oh-my-zsh.sh" ] && source "$ZSH/oh-my-zsh.sh"
+fi
 
 # --- locale & editor ---
 export LANG=en_US.UTF-8
@@ -26,11 +33,17 @@ ZSH_AUTOSUGGEST_HIGHLIGHT_STYLE='fg=white'
 zstyle ':completion:*' menu select
 
 # --- PATH (portable) ---
+# -U must also be on the scalars: on zsh 5.9, `export PATH="x:$PATH"` skips
+# the dedupe when only the tied arrays are unique.
+typeset -gU PATH path FPATH fpath
 export PATH="$HOME/.local/bin:$PATH"
 export PATH="$HOME/.npm-global/bin:$PATH"
 
-# --- node / fnm ---
-command -v fnm >/dev/null && eval "$(fnm env --use-on-cd --shell zsh)"
+# --- node / fnm (once per shell: each `fnm env` run creates a new multishell session) ---
+if (( ! ${+_dotfiles_fnm_loaded} )) && command -v fnm >/dev/null; then
+  typeset -g _dotfiles_fnm_loaded=1
+  eval "$(fnm env --use-on-cd --shell zsh)"
+fi
 
 # --- bun ---
 export BUN_INSTALL="$HOME/.bun"
@@ -96,3 +109,6 @@ export CLAUDE_CODE_DISABLE_NONESSENTIAL_TRAFFIC=1
 export CLAUDE_CODE_ENABLE_TODO_TOOLS=1
 export DISABLE_TELEMETRY=1
 export DO_NOT_TRACK=1
+
+# --- auto-reload on config change ---
+source "${_dotfiles_shared_rc:h}/auto-reload.zsh"
