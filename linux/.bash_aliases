@@ -1,5 +1,6 @@
 
 alias l='ls -la --color=always'
+alias gitf='GIT_EXTERNAL_DIFF=difft git'
 
 if [ "$TERM" != "dumb" ]; then
     eval "`dircolors -b`"

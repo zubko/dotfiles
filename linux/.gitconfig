@@ -3,5 +3,3 @@
 	name = zubko
 [pull]
 	rebase = false
-[diff]
-    external = difft
