@@ -68,6 +68,7 @@ alias n='npm'
 alias y='yarn'
 alias z='zed'
 alias c='claude'
+alias crc='env -u CLAUDE_CODE_DISABLE_NONESSENTIAL_TRAFFIC claude rc'
 alias gitf='GIT_EXTERNAL_DIFF=difft git'
 
 # --- functions ---
