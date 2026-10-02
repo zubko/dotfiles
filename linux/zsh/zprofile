@@ -1,0 +1,14 @@
+# zsh login config (Linux) — git: ~/dotfiles/linux/zsh/zprofile
+# Sourced from ~/.zprofile. Machine-specific PATHs stay in ~/.zprofile.
+
+# --- rust / cargo ---
+[ -f "$HOME/.cargo/env" ] && source "$HOME/.cargo/env"
+
+# --- pnpm ---
+if [ -d "$HOME/.local/share/pnpm" ]; then
+  export PNPM_HOME="$HOME/.local/share/pnpm"
+  case ":$PATH:" in
+    *":$PNPM_HOME:"*) ;;
+    *) export PATH="$PNPM_HOME:$PATH" ;;
+  esac
+fi

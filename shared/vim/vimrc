@@ -1,3 +1,5 @@
+unlet! skip_defaults_vim | source $VIMRUNTIME/defaults.vim
+
 " Tab exp
 set tabstop=4
 set softtabstop=4

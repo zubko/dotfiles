@@ -1,5 +1,5 @@
 # Machine-local zsh config — NOT tracked in git.
-# install.sh appends the "source shared.zshrc" block automatically; put
+# install.sh (repo root) appends the "source shared.zshrc" block automatically; put
 # machine-only lines ABOVE that block. Below is the work-machine sample —
 # copy the bits that apply to a given machine into its real ~/.zshrc.
 

@@ -1,4 +1,4 @@
-# Shared zsh config (macOS) — git: ~/dotfiles/macos/zsh/shared.zshrc
+# Shared zsh config — git: ~/dotfiles/shared/zsh/shared.zshrc
 # Sourced from ~/.zshrc. Machine-specific settings stay in ~/.zshrc itself.
 # This file is re-sourced by auto-reload.zsh, from inside a function:
 # top-level `typeset` must always use -g here.
@@ -22,10 +22,12 @@ fi
 
 # --- locale & editor ---
 export LANG=en_US.UTF-8
-if [[ -n $SSH_CONNECTION ]]; then
-  export EDITOR='vim'
-else
+if [[ -z $SSH_CONNECTION ]] && command -v zed >/dev/null; then
   export EDITOR='zed --wait'
+elif command -v nvim >/dev/null; then
+  export EDITOR='nvim'
+else
+  export EDITOR='vim'
 fi
 
 # --- completion / plugin styling ---
@@ -42,7 +44,8 @@ export PATH="$HOME/.npm-global/bin:$PATH"
 # --- node / fnm (once per shell: each `fnm env` run creates a new multishell session) ---
 if (( ! ${+_dotfiles_fnm_loaded} )) && command -v fnm >/dev/null; then
   typeset -g _dotfiles_fnm_loaded=1
-  eval "$(fnm env --use-on-cd --shell zsh)"
+  # recursive: subprojects without their own .node-version pick up the nearest parent's
+  eval "$(fnm env --use-on-cd --version-file-strategy=recursive --shell zsh)"
 fi
 
 # --- bun ---

@@ -1,4 +1,4 @@
-# Shared zsh login config (macOS) — git: ~/dotfiles/macos/zsh/shared.zprofile
+# zsh login config (macOS) — git: ~/dotfiles/macos/zsh/zprofile
 # Sourced from ~/.zprofile. Machine-specific PATHs stay in ~/.zprofile.
 
 # --- homebrew (Apple Silicon) ---
