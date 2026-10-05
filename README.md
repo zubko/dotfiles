@@ -7,6 +7,7 @@ Config for zsh, tmux, git, vim and nvim. One repo for Macs, Debian Linux and Ras
 - `shared/` works on every machine: `shared/zsh`, `shared/tmux`, `shared/git`, `shared/vim`, `shared/nvim`.
 - `macos/` and `linux/` hold only things that depend on the OS. Today that is `macos/zsh/zprofile` and `linux/zsh/zprofile`. `macos/.config` holds skhd, yabai and revdiff, applied with `macos/apply-configs.sh`.
 - Rule: a new setting goes to `shared/` unless it only makes sense on one OS.
+- `tests/tmux-menu/` holds the tests for the tmux menu.
 
 ## New machine
 
@@ -57,3 +58,26 @@ tmux source-file ~/.tmux.conf
 ```
 
 `prefix r` does the same, but it does not work in `tmux -CC` mode.
+
+## tmux menu on SSH login
+
+An interactive SSH login shows a menu of the tmux sessions:
+
+- a number attaches to that session. `n` starts a new session.
+- `q`, Enter, Ctrl-C or Ctrl-D quits the menu and gives a normal shell.
+
+Detach gives a normal shell prompt. Run `tm` to see the menu again.
+
+The menu attaches with plain tmux. For the iTerm2 `-CC` mode, quit the menu and run `tmux -CC attach`.
+
+The menu is on by default, and every machine gets it with `git pull`. On a machine that should not show it, put this line above the managed block in `~/.zshrc` before you pull:
+
+```
+DOTFILES_TMUX_MENU=0
+```
+
+Local terminals, tmux panes, IDE remote terminals, Emacs TRAMP (`TERM=dumb`), `scp`, `rsync` and `ssh host cmd` get no menu. mosh is not covered: the mosh shell runs on its own tty.
+
+To skip the menu for one login, run `zsh -l` as the command: `ssh -t host 'zsh -l'`. Scripts that send commands to `ssh -tt` need the same: `ssh -tt host 'zsh -l' <<EOF`.
+
+The menu runs at the end of `shared/zsh/shared.zshrc`, after the full config. The `tm` function is in `shared/zsh/tmux-menu.zsh`.

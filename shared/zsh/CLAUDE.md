@@ -18,6 +18,14 @@ Limitations:
 
 Rules for editing `shared/zsh/shared.zshrc`:
 
-- Keep the oh-my-zsh and fnm blocks behind their run-once guards.
+- Keep the oh-my-zsh, fnm and tmux menu blocks behind their run-once guards.
+- Keep the tmux menu block last. A tmux server started from the menu copies the env as it is at that point.
 - The file is re-sourced from inside a function. At top level use `typeset -g` or `export`, never plain `typeset`.
 - Keep `typeset -gU PATH path FPATH fpath` above the PATH prepends. It dedupes PATH on every reload. The scalars must be listed too: on zsh 5.9, `export PATH="x:$PATH"` skips the dedupe when only the tied arrays are unique.
+
+## tmux menu on SSH login
+
+The last block of `shared/zsh/shared.zshrc` runs `tm` from `shared/zsh/tmux-menu.zsh` once per shell. It runs only in the login shell that sshd starts on the SSH tty.
+
+- `$ZSH_ARGZERO` starts with `-` only in a login shell started by sshd or `login`. IDEs and scripts run `zsh -l`, which gives `/bin/zsh`, so they get no menu.
+- `tm` runs tmux in the login shell itself, so job control works: `C-b C-z` suspends the client and `fg` brings it back.

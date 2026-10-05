@@ -117,3 +117,15 @@ export DO_NOT_TRACK=1
 
 # --- auto-reload on config change ---
 source "${_dotfiles_shared_rc:h}/auto-reload.zsh"
+
+# --- tmux session menu on SSH login (once per shell) ---
+# Keep this block last: a tmux server started from the menu copies the env as it is here.
+source "${_dotfiles_shared_rc:h}/tmux-menu.zsh"
+if (( ! ${+_dotfiles_tmux_menu_done} )); then
+  typeset -g _dotfiles_tmux_menu_done=1
+  # a leading '-' marks the login shell that sshd starts; IDEs and scripts run `zsh -l`
+  if [[ $ZSH_ARGZERO == -* && -n $SSH_TTY && $TTY == $SSH_TTY && -z $TMUX && ${DOTFILES_TMUX_MENU:-1} != 0 \
+    && $TERM != dumb ]] && (( $+commands[tmux] )); then
+    tm
+  fi
+fi
