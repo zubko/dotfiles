@@ -4,7 +4,7 @@ Config for zsh, tmux, git, vim and nvim. One repo for Macs, Debian Linux and Ras
 
 ## Layout
 
-- `shared/` works on every machine: `shared/zsh`, `shared/tmux`, `shared/git`, `shared/vim`, `shared/nvim`.
+- `shared/` works on every machine: `shared/zsh`, `shared/tmux`, `shared/git`, `shared/vim`, `shared/nvim`. `shared/lazyvim` is a LazyVim config to compare with, see its README.
 - `macos/` and `linux/` hold only things that depend on the OS. Today that is `macos/zsh/zprofile` and `linux/zsh/zprofile`. `macos/.config` holds skhd, yabai and revdiff, applied with `macos/apply-configs.sh`.
 - Rule: a new setting goes to `shared/` unless it only makes sense on one OS.
 - `tests/tmux-menu/` holds the tests for the tmux menu.
