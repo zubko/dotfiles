@@ -2,8 +2,9 @@
 # Sourced from shared.zshrc, which runs `tm` once on SSH login. Run `tm` to see the menu again.
 
 tm() {
+  emulate -L zsh
   local -a lines
-  local out choice name i
+  local out choice name i key keys=qwertyuiop
   # ':' as the separator: tmux turns a tab into '_' and does not allow ':' in session names
   out=$(tmux list-sessions -F '#{session_name}:#{session_windows} win#{?session_attached, attached,}' 2>&1) \
     && lines=(${(f)out})
@@ -11,16 +12,23 @@ tm() {
   print "\ntmux sessions:"
   if (( $#lines )); then
     for (( i = 1; i <= $#lines; i++ )); do
-      print -r -- "  $i) ${lines[i]%%:*}  [${lines[i]#*:}]"
+      if (( i <= 10 )); then key="$(( i % 10 ))/${keys[i]}"; else key=$i; fi
+      print -r -- "  $key) ${lines[i]%%:*}  [${lines[i]#*:}]"
     done
   elif [[ -n $out && $out != (no server running|error connecting to *\(No such file or directory\))* ]]; then
     print -r -- "  $out"
   else
     print "  (none)"
   fi
-  print "  n) new session\n  q) quit"
+  print "  n) new session\n  x) quit"
 
   while read -r "choice?> "; do
+    # phone keyboards may capitalize the first letter
+    choice=${choice:l}
+    case $choice in
+      0) choice=10 ;;
+      [$keys]) choice=${keys[(i)$choice]} ;;
+    esac
     case $choice in
       <->)
         if (( choice >= 1 && choice <= $#lines )); then
@@ -32,7 +40,7 @@ tm() {
         read -r "name?Session name (blank = auto): " || return
         if [[ -n $name ]]; then tmux new-session -s "$name"; else tmux new-session; fi
         return ;;
-      q|'') return ;;
+      x|'') return ;;
     esac
     print "Invalid choice."
   done

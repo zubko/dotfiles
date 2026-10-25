@@ -29,3 +29,4 @@ The last block of `shared/zsh/shared.zshrc` runs `tm` from `shared/zsh/tmux-menu
 
 - `$ZSH_ARGZERO` starts with `-` only in a login shell started by sshd or `login`. IDEs and scripts run `zsh -l`, which gives `/bin/zsh`, so they get no menu.
 - `tm` runs tmux in the login shell itself, so job control works: `C-b C-z` suspends the client and `fg` brings it back.
+- We expect at most 10 sessions for now. Sessions 1-10 get a number and a letter (`1/q` … `0/p`), and session 11 and later get only a number. The tests use 3 sessions and do not cover more than 10.

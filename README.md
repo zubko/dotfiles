@@ -63,8 +63,9 @@ tmux source-file ~/.tmux.conf
 
 An interactive SSH login shows a menu of the tmux sessions:
 
-- a number attaches to that session. `n` starts a new session.
-- `q`, Enter, Ctrl-C or Ctrl-D quits the menu and gives a normal shell.
+- a number or the letter next to it attaches to that session. The first 10 sessions get `1`-`9`, `0` and the letters `q`-`p` from the row under them. The letters are easier to type on a phone.
+- `n` starts a new session.
+- `x`, Enter, Ctrl-C or Ctrl-D quits the menu and gives a normal shell.
 
 Detach gives a normal shell prompt. Run `tm` to see the menu again.
 

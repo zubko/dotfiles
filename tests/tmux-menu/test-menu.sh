@@ -22,6 +22,7 @@ login() { st python3 tests/tmux-menu/drive.py --argv0=-zsh --ssh-tty "$@" -- "$Z
 kill_server() { st "$TM" -S "$S" kill-server 2>/dev/null; }
 trap kill_server EXIT
 NOLANG=(--unset LANG --unset LC_ALL --unset LC_CTYPE)
+# 'sleep:0.5' before tmux keys: the client drops keys that come before it is ready for input
 
 fail=0
 check() { # name output regex...  (a regex that starts with ! must not match)
@@ -38,7 +39,7 @@ kill_server
 
 # --- no server: the menu starts it with the final env, even when the client sends no locale ---
 out=$(login "${NOLANG[@]}" --step 'expect:\(none\)' --step 'expect:> ' --step 'send:n\r' \
-  --step 'expect:Session name' --step 'send:fresh\r' --step 'expect:\[fresh\]' --step 'send:\x02d' \
+  --step 'expect:Session name' --step 'send:fresh\r' --step 'expect:\[fresh\]' --step 'sleep:0.5' --step 'send:\x02d' \
   --step 'expect:detached' --step 'expect:PROMPT> ' --step 'send:tmux show-environment -g LANG\r' \
   --step 'expect:LANG=en_US.UTF-8' --step 'send:tmux show-environment -g PATH\r' \
   --step 'expect:PATH=.*\.tmp/home/\.local/bin' --step 'send:exit 0\r' --step eof)
@@ -48,7 +49,7 @@ kill_server
 # --- a tmux error other than "no server" is shown ---
 mkdir -p ".tmp/bad/tmux-$(id -u)" && chmod 777 ".tmp/bad/tmux-$(id -u)"
 out=$(login --env "TMUX_TMPDIR=$R/.tmp/bad" --step 'expect:unsafe permissions' --step 'expect:> ' \
-  --step 'send:q\r' --step 'expect:PROMPT> ' --step 'send:exit 0\r' --step eof)
+  --step 'send:x\r' --step 'expect:PROMPT> ' --step 'send:exit 0\r' --step eof)
 check 'a tmux error is shown, not (none)' "$out" '^EXIT=0$' '!\(none\)'
 
 # --- throwaway server ---
@@ -60,16 +61,16 @@ sockets=$(st "$TM" list-sessions -F '#{socket_path}' | sort -u)
 if [[ $sockets != "$S" ]]; then echo "STOP: socket check failed: $sockets"; exit 1; fi
 echo "PASS socket check: $sockets"
 
-out=$(login --step 'expect:3\) work  \[2 win\]' --step 'expect:> ' --step 'send:3\r' --step 'expect:\[work\]' \
-  --step 'send:\x02\x1a' --step 'expect:suspended' --step 'expect:PROMPT> ' --step 'send:fg\r' \
-  --step 'expect:continued' --step 'expect:\[work\]' --step 'send:\x02d' \
+out=$(login --step 'expect:3/e\) work  \[2 win\]' --step 'expect:> ' --step 'send:3\r' --step 'expect:\[work\]' \
+  --step 'sleep:0.5' --step 'send:\x02\x1a' --step 'expect:suspended' --step 'expect:PROMPT> ' --step 'send:fg\r' \
+  --step 'expect:continued' --step 'expect:\[work\]' --step 'sleep:0.5' --step 'send:\x02d' \
   --step 'expect:detached \(from session work\)' --step 'expect:PROMPT> ' --step 'send:tm\r' \
-  --step 'expect:tmux sessions:' --step 'expect:> ' --step 'send:q\r' --step 'expect:PROMPT> ' \
+  --step 'expect:tmux sessions:' --step 'expect:> ' --step 'send:x\r' --step 'expect:PROMPT> ' \
   --step 'send:exit 0\r' --step eof)
-check 'attach, C-b C-z, fg, detach to a prompt, tm, q' "$out" '^EXIT=0$' '^  1\) café  \[1 win\]$' '^  2\) my notes  \[1 win\]$'
+check 'attach, C-b C-z, fg, detach to a prompt, tm, x' "$out" '^EXIT=0$' '^  1/q\) café  \[1 win\]$' '^  2/w\) my notes  \[1 win\]$'
 [[ $(menus "$out") == 2 ]] || { echo "FAIL want 2 menus (login + tm), got $(menus "$out")"; fail=1; }
 
-for key in 'q\r' '\r' '\x03' '\x04'; do
+for key in 'x\r' '\r' '\x03' '\x04'; do
   # shellcheck disable=SC2016  # the print line runs in the test shell, not here
   out=$(login --step 'expect:> ' --step "send:$key" --step 'expect:PROMPT> ' \
     --step 'send:print -r -- "E=$EDITOR L=$LANG W=$(whence -w tm) H=${precmd_functions[(r)_dotfiles_rc_maybe_reload]}"\r' \
@@ -77,10 +78,17 @@ for key in 'q\r' '\r' '\x03' '\x04'; do
   check "key $key quits the menu to a shell with the full config" "$out" '^EXIT=0$'
 done
 
-out=$(login --step 'expect:> ' --step 'send:x\r' --step 'expect:Invalid choice' --step 'send:9\r' \
-  --step 'expect:Invalid choice' --step 'send:0\r' --step 'expect:Invalid choice' --step 'send:q\r' \
+out=$(login --step 'expect:> ' --step 'send:z\r' --step 'expect:Invalid choice' --step 'send:9\r' \
+  --step 'expect:Invalid choice' --step 'send:0\r' --step 'expect:Invalid choice' --step 'send:p\r' \
+  --step 'expect:Invalid choice' --step 'send:qw\r' --step 'expect:Invalid choice' --step 'send:x\r' \
   --step 'expect:PROMPT> ' --step 'send:exit 0\r' --step eof)
 check 'invalid choices ask again' "$out" '^EXIT=0$'
+
+for key in e E; do
+  out=$(login --step 'expect:> ' --step "send:$key\r" --step 'expect:\[work\]' --step 'sleep:0.5' --step 'send:\x02d' \
+    --step 'expect:detached \(from session work\)' --step 'expect:PROMPT> ' --step 'send:exit 0\r' --step eof)
+  check "letter $key attaches session 3" "$out" '^EXIT=0$'
+done
 
 out=$(login --step 'expect:> ' --step 'send:n\r' --step 'expect:Session name' --step 'send:work\r' \
   --step 'expect:duplicate session: work' --step 'expect:PROMPT> ' --step 'send:exit 0\r' --step eof)
@@ -94,20 +102,20 @@ for key in 'abc\x03' '\x04'; do
 done
 
 out=$(login --step 'expect:> ' --step 'send:n\r' --step 'expect:Session name' --step 'send:\r' \
-  --step 'expect:\[[0-9]+\]' --step 'send:\x02d' --step 'expect:detached' --step 'expect:PROMPT> ' \
+  --step 'expect:\[[0-9]+\]' --step 'sleep:0.5' --step 'send:\x02d' --step 'expect:detached' --step 'expect:PROMPT> ' \
   --step 'send:exit 0\r' --step eof)
 check 'n with a blank name gets an auto name' "$out" '^EXIT=0$'
 st "$TM" -S "$S" list-sessions -F '#S' | grep -E '^[0-9]+$' | while read -r n; do st "$TM" -S "$S" kill-session -t "=$n"; done
 
-out=$(login "${NOLANG[@]}" --step 'expect:1\) café' --step 'expect:> ' --step 'send:1\r' --step 'expect:\[café\]' \
-  --step 'send:\x02d' --step 'expect:detached' --step 'expect:PROMPT> ' --step 'send:exit 0\r' --step eof)
+out=$(login "${NOLANG[@]}" --step 'expect:1/q\) café' --step 'expect:> ' --step 'send:1\r' --step 'expect:\[café\]' \
+  --step 'sleep:0.5' --step 'send:\x02d' --step 'expect:detached' --step 'expect:PROMPT> ' --step 'send:exit 0\r' --step eof)
 check 'UTF-8 when the client sends no locale' "$out" '^EXIT=0$' '!caf_'
 
 out=$(login --env TERM=xterm-bogus --step 'expect:unsuitable terminal: xterm-bogus' --step 'expect:> ' \
-  --step 'send:q\r' --step 'expect:PROMPT> ' --step 'send:exit 0\r' --step eof)
+  --step 'send:x\r' --step 'expect:PROMPT> ' --step 'send:exit 0\r' --step eof)
 check 'unknown TERM: the menu shows the tmux error' "$out" '^EXIT=0$' '!\(none\)'
 
-out=$(login --step 'expect:> ' --step 'send:q\r' --step 'expect:PROMPT> ' \
+out=$(login --step 'expect:> ' --step 'send:x\r' --step 'expect:PROMPT> ' \
   --step "run:cp '$R/.tmp/zdot/.zshrc' '$R/.tmp/home/.zshrc'" --step 'send:\r' \
   --step 'expect:zsh config reloaded' --step 'expect:PROMPT> ' --step 'send:exit 0\r' --step eof)
 check 'auto-reload does not show the menu again' "$out" '^EXIT=0$'
@@ -120,8 +128,8 @@ check 'zsh -l (IDE, script): no menu' "$out" '^EXIT=0$' '!tmux sessions:'
 out=$(login --env "ZDOTDIR=$R/.tmp/zdot-off" --step 'expect:PROMPT> ' --step 'send:exit 0\r' --step eof)
 check 'DOTFILES_TMUX_MENU=0 above the block in ~/.zshrc' "$out" '^EXIT=0$' '!tmux sessions:'
 
-out=$(login --step 'expect:3\) work' --step 'expect:> ' --step "run:'$TM' -S '$S' kill-session -t =work" \
-  --step 'send:3\r' --step "expect:can't find session" --step 'expect:PROMPT> ' --step 'send:exit 0\r' --step eof)
+out=$(login --step 'expect:3/e\) work' --step 'expect:> ' --step "run:'$TM' -S '$S' kill-session -t =work" \
+  --step 'send:e\r' --step "expect:can't find session" --step 'expect:PROMPT> ' --step 'send:exit 0\r' --step eof)
 check 'a session that is gone' "$out" '^EXIT=0$'
 
 exit $fail
