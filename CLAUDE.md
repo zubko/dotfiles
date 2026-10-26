@@ -7,6 +7,7 @@
 - `install.sh` wires the home dotfiles to the repo files with a managed block, a git include and the nvim symlink.
 - `sync.sh` pulls, shows the machine-only lines, then commits and pushes after a confirm.
 - zsh details and the auto-reload rules are in `shared/zsh/CLAUDE.md`.
+- The tmux cheat sheet rules and its style are in `shared/tmux/CLAUDE.md`.
 - `tests/tmux-menu/` holds the tmux menu tests. They write their fixtures to `.tmp/`.
 
 ## Rules
@@ -31,6 +32,8 @@ tmux -S "$S" -f /dev/null start-server \; set -g exit-empty off
 tmux -S "$S" source-file shared/tmux/tmux.conf; echo "rc=$?"
 tmux -S "$S" kill-server; rm -f "$S"
 ```
+
+- After a change to a tmux key binding or to `tm`, update the cheat sheet and render the PDF. See `shared/tmux/CLAUDE.md`.
 
 - Lint scripts with `bash -n` and `shellcheck`, zsh files with `zsh -n`.
 - After a change to the tmux menu, run `tests/tmux-menu/test-trigger.sh` and `tests/tmux-menu/test-menu.sh`. They use a throwaway tmux server under `.tmp/` and never touch the real one. New tmux tests must keep the same rules:
