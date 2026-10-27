@@ -4,7 +4,7 @@
 
 - `shared/<tool>/` holds the config for each tool. It is the same on every machine.
 - `macos/` and `linux/` hold only OS-bound files. `install.sh` picks the right `zsh/zprofile` by `uname`.
-- `install.sh` wires the home dotfiles to the repo files with a managed block, a git include and the nvim symlink.
+- `install.sh` wires the home dotfiles to the repo files with a managed block, a git include and the nvim symlink. It also clones the tmux plugins into `~/.tmux/plugins`.
 - `sync.sh` pulls, shows the machine-only lines, then commits and pushes after a confirm.
 - zsh details and the auto-reload rules are in `shared/zsh/CLAUDE.md`.
 - The tmux cheat sheet rules and its style are in `shared/tmux/CLAUDE.md`.
@@ -27,11 +27,13 @@ env -u ZSH -u ZDOTDIR -u ZSH_CUSTOM -u XDG_CONFIG_HOME -u GIT_CONFIG_GLOBAL \
 - Check a tmux config on a throwaway socket, never with a bare `tmux kill-server`:
 
 ```
-S=.tmp/tmux.sock
-tmux -S "$S" -f /dev/null start-server \; set -g exit-empty off
+S=.tmp/tmux.sock; mkdir -p .tmp/home
+env -u XDG_CONFIG_HOME -u XDG_DATA_HOME HOME="$PWD/.tmp/home" tmux -S "$S" -f /dev/null start-server \; set -g exit-empty off
 tmux -S "$S" source-file shared/tmux/tmux.conf; echo "rc=$?"
 tmux -S "$S" kill-server; rm -f "$S"
 ```
+
+- Start every test tmux server with the fixture `HOME` and without `XDG_CONFIG_HOME` and `XDG_DATA_HOME`. With the real home, tmux.conf loads the plugins from `~/.tmux/plugins`. When no other tmux server runs, continuum then restores the real sessions into the test server and saves the test sessions over the real ones. TPM and resurrect also read the two XDG variables, so they could reach the real plugins and saves too.
 
 - After a change to a tmux key binding or to `tm`, update the cheat sheet and render the PDF. See `shared/tmux/CLAUDE.md`.
 

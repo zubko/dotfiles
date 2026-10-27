@@ -13,6 +13,9 @@ OMZ_INSTALLER_URL="https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tool
 # shared.zshrc puts ~/.local/bin on the PATH. The script must see the same tools (nvim, fnm).
 PATH="$HOME/.local/bin:$PATH"
 
+# For a missing or private GitHub repo, git asks for a login. Fail at once instead of waiting.
+export GIT_TERMINAL_PROMPT=0
+
 START_PAT='^[#"] >>> dotfiles shared [(]managed by [^)]*[)] >>>$'
 END_PAT='^[#"] <<< dotfiles shared <<<$'
 
@@ -186,7 +189,7 @@ install_omz_plugins() {
       git -C "$dir" pull -q --ff-only || echo "plugin $name: update failed, kept the current version"
     else
       echo "Cloning plugin $name..."
-      git clone -q --depth=1 "$url" "$dir"
+      git clone -q --depth=1 "$url" "$dir" || echo "plugin $name: clone failed"
     fi
   done <<'PLUGINS'
 zsh-autosuggestions|https://github.com/zsh-users/zsh-autosuggestions.git
@@ -295,6 +298,25 @@ link_nvim() {
   report "$HOME/.config/nvim" "changed"
 }
 
+# --- 5. tmux plugins ---
+
+# Clones TPM and the plugins that tmux.conf lists into ~/.tmux/plugins, like prefix I in tmux.
+install_tmux_plugins() {
+  local plugin name dir
+  mkdir -p "$HOME/.tmux/plugins"
+  while read -r plugin; do
+    [ -n "$plugin" ] || continue
+    name="${plugin##*/}"
+    dir="$HOME/.tmux/plugins/$name"
+    if [ -d "$dir/.git" ]; then
+      git -C "$dir" pull -q --ff-only || echo "tmux plugin $name: update failed, kept the current version"
+    else
+      echo "Cloning tmux plugin $name..."
+      git clone -q --depth=1 "https://github.com/$plugin" "$dir" || echo "tmux plugin $name: clone failed"
+    fi
+  done < <(awk '/^[ \t]*set(-option)? +-g +@plugin/ { gsub(/["'\'']/, ""); print $4 }' "$REPO/shared/tmux/tmux.conf")
+}
+
 # --- main ---
 
 if [ "${DOTFILES_SKIP_SYSTEM:-}" != 1 ]; then
@@ -312,9 +334,11 @@ write_block "$HOME/.vimrc" '"' "source $REPO/shared/vim/vimrc"
 add_git_include
 link_nvim
 link_theme
+install_tmux_plugins
 
 echo
 echo "Summary:"
 printf '%s' "$SUMMARY"
 echo
 echo "Done. Start a fresh shell with: exec zsh"
+echo "In a running tmux, press prefix r to load the tmux plugins."

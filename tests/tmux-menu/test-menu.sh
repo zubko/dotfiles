@@ -9,7 +9,8 @@ ZSH_BIN=$(command -v zsh)
 TM=$(command -v tmux)
 # mkdir first: when the TMUX_TMPDIR dir is missing, tmux falls back to /tmp and the real server
 mkdir -p .tmp/home .tmp/zdot .tmp/zdot-off .tmp/bad
-rm -f .tmp/home/.zshrc
+# an install.sh fixture run leaves a .tmux.conf there that loads the tmux plugins
+rm -f .tmp/home/.zshrc .tmp/home/.tmux.conf
 S=$R/.tmp/tmux-$(id -u)/default
 printf 'source %q\n' "$R/$PLATFORM/zsh/zprofile" | tee .tmp/zdot/.zprofile > .tmp/zdot-off/.zprofile
 printf "PS1='PROMPT> '\nsource %q\n" "$R/shared/zsh/shared.zshrc" > .tmp/zdot/.zshrc

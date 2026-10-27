@@ -1,5 +1,9 @@
 # tmux
 
+## tmux.conf
+
+- Our hooks use slot 10: `set-hook -g <hook>[10] ...`. Never write a hook without a slot, which writes slot 0, and never use `set-hook -a`. Slot 0 is left for plugins and stock tmux, so neither side overwrites the other. A fixed slot is written again on every reload, while `-a` adds one more copy each time. When one hook needs a second command of ours, use slot 11, 12 and so on.
+
 ## Cheat sheet
 
 `cheatsheet.html` is a one-page A4 print of the vital tmux keys. It is written by hand, not built from `tmux.conf`. `cheatsheet.pdf` is made from it and is gitignored.
