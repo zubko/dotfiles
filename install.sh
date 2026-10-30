@@ -303,17 +303,25 @@ link_nvim() {
 
 # Clones TPM and the plugins that tmux.conf lists into ~/.tmux/plugins, like prefix I in tmux.
 install_tmux_plugins() {
-  local plugin name dir
+  local plugin repo ref name dir
   mkdir -p "$HOME/.tmux/plugins"
   while read -r plugin; do
     [ -n "$plugin" ] || continue
-    name="${plugin##*/}"
+    # TPM form: owner/name or owner/name#ref
+    repo="${plugin%%#*}"
+    ref=""
+    [ "$repo" = "$plugin" ] || ref="${plugin#*#}"
+    name="${repo##*/}"
     dir="$HOME/.tmux/plugins/$name"
-    if [ -d "$dir/.git" ]; then
+    if [ -d "$dir/.git" ] && [ -n "$ref" ]; then
+      { git -C "$dir" fetch -q --depth=1 origin "$ref" &&
+        git -C "$dir" -c advice.detachedHead=false checkout -q FETCH_HEAD; } ||
+        echo "tmux plugin $name: switch to $ref failed, kept the current version"
+    elif [ -d "$dir/.git" ]; then
       git -C "$dir" pull -q --ff-only || echo "tmux plugin $name: update failed, kept the current version"
     else
       echo "Cloning tmux plugin $name..."
-      git clone -q --depth=1 "https://github.com/$plugin" "$dir" || echo "tmux plugin $name: clone failed"
+      git -c advice.detachedHead=false clone -q --depth=1 ${ref:+--branch "$ref"} "https://github.com/$repo" "$dir" || echo "tmux plugin $name: clone failed"
     fi
   done < <(awk '/^[ \t]*set(-option)? +-g +@plugin/ { gsub(/["'\'']/, ""); print $4 }' "$REPO/shared/tmux/tmux.conf")
 }
