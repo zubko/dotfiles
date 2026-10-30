@@ -314,6 +314,8 @@ install_tmux_plugins() {
     name="${repo##*/}"
     dir="$HOME/.tmux/plugins/$name"
     if [ -d "$dir/.git" ] && [ -n "$ref" ]; then
+      # The repo may have changed, for example from upstream to a fork.
+      git -C "$dir" remote set-url origin "https://github.com/$repo"
       { git -C "$dir" fetch -q --depth=1 origin "$ref" &&
         git -C "$dir" -c advice.detachedHead=false checkout -q FETCH_HEAD; } ||
         echo "tmux plugin $name: switch to $ref failed, kept the current version"
