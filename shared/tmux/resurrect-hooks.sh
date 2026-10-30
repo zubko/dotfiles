@@ -8,6 +8,12 @@
 #                  again. resurrect does not keep the pane option that marks a sidebar pane.
 set -uo pipefail
 
+# Without a UTF-8 locale, tmux prints the tabs in -F output as _, and cts then sees no panes.
+case "${LC_ALL:-${LC_CTYPE:-${LANG:-}}}" in
+  *[Uu][Tt][Ff]-8 | *[Uu][Tt][Ff]8) ;;
+  *) export LC_ALL=en_US.UTF-8 ;;
+esac
+
 PANES_OPTION="@resurrect-hooks-panes"
 SIDEBAR_OPTION="@resurrect-hooks-sidebar"
 UUID='^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$'
