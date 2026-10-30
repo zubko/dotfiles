@@ -47,7 +47,7 @@ package_for() {
 install_packages_macos() {
   local cmd pkg
   command -v brew >/dev/null || { echo "error: Homebrew is required: https://brew.sh" >&2; exit 1; }
-  for cmd in zsh tmux git vim nvim rg eza fnm jq; do
+  for cmd in zsh tmux git vim nvim rg eza fnm jq shellcheck; do
     command -v "$cmd" >/dev/null && continue
     pkg="$(package_for "$cmd")"
     echo "Installing $pkg..."
@@ -111,7 +111,7 @@ install_packages_linux() {
   local cmd pkg updated=0
   # gcc: nvim-treesitter builds its parsers with it. rg: telescope live_grep needs it.
   # jq: resurrect-hooks.sh reads the Claude session files with it.
-  for cmd in curl unzip gcc zsh tmux git vim rg eza jq; do
+  for cmd in curl unzip gcc zsh tmux git vim rg eza jq shellcheck; do
     command -v "$cmd" >/dev/null && continue
     pkg="$(package_for "$cmd")"
     if [ "$updated" = 0 ]; then
