@@ -9,6 +9,7 @@
 - zsh details and the auto-reload rules are in `shared/zsh/CLAUDE.md`.
 - The tmux cheat sheet rules and its style are in `shared/tmux/CLAUDE.md`.
 - `tests/tmux-menu/` holds the tmux menu tests. They write their fixtures to `.tmp/`.
+- `shared/tmux/resurrect-hooks.sh` runs on the resurrect hooks. `save` writes `claude --resume <id>` as the command of each Claude pane, so a restore brings the same session back. `restore` kills the shells that stand where the sidebar panes were and runs `cts on`. `tests/resurrect-hooks/` holds its tests.
 
 ## Rules
 
@@ -38,6 +39,7 @@ tmux -S "$S" kill-server; rm -f "$S"
 - After a change to a tmux key binding or to `tm`, update the cheat sheet and render the PDF. See `shared/tmux/CLAUDE.md`.
 
 - Lint scripts with `bash -n` and `shellcheck`, zsh files with `zsh -n`.
+- After a change to `resurrect-hooks.sh`, run `tests/resurrect-hooks/test-save.sh` and `tests/resurrect-hooks/test-restore.sh`. They follow the tmux test rules below.
 - After a change to the tmux menu, run `tests/tmux-menu/test-trigger.sh` and `tests/tmux-menu/test-menu.sh`. They use a throwaway tmux server under `.tmp/` and never touch the real one. New tmux tests must keep the same rules:
   - `mkdir -p .tmp` first. When the `TMUX_TMPDIR` dir is missing, tmux falls back to `/tmp` and the real server.
   - `env -u TMUX TMUX_TMPDIR="$PWD/.tmp"`, because `$TMUX` wins over `TMUX_TMPDIR`.

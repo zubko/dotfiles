@@ -50,8 +50,8 @@ kill_server
 # --- a tmux error other than "no server" is shown ---
 mkdir -p ".tmp/bad/tmux-$(id -u)" && chmod 777 ".tmp/bad/tmux-$(id -u)"
 out=$(login --env "TMUX_TMPDIR=$R/.tmp/bad" --step 'expect:unsafe permissions' --step 'expect:> ' \
-  --step 'send:x\r' --step 'expect:PROMPT> ' --step 'send:exit 0\r' --step eof)
-check 'a tmux error is shown, not (none)' "$out" '^EXIT=0$' '!\(none\)'
+  --step 'send:\r' --step 'expect:PROMPT> ' --step 'send:exit 0\r' --step eof)
+check 'a tmux error is shown, not (none), and Enter quits' "$out" '^EXIT=0$' '!\(none\)'
 
 # --- throwaway server ---
 st "$TM" -S "$S" -u -f /dev/null new-session -d -s work
@@ -68,10 +68,11 @@ out=$(login --step 'expect:3/e\) work  \[2 win\]' --step 'expect:> ' --step 'sen
   --step 'expect:detached \(from session work\)' --step 'expect:PROMPT> ' --step 'send:tm\r' \
   --step 'expect:tmux sessions:' --step 'expect:> ' --step 'send:x\r' --step 'expect:PROMPT> ' \
   --step 'send:exit 0\r' --step eof)
-check 'attach, C-b C-z, fg, detach to a prompt, tm, x' "$out" '^EXIT=0$' '^  1/q\) café  \[1 win\]$' '^  2/w\) my notes  \[1 win\]$'
+check 'attach, C-b C-z, fg, detach to a prompt, tm, x' "$out" '^EXIT=0$' '^  1/q\) café  \[1 win\]$' '^  2/w\) my notes  \[1 win\]$' \
+  '^  1/q\) work  \[2 win\]$' '^  2/w\) café  \[1 win\]$' '^  3/e\) my notes  \[1 win\]$'
 [[ $(menus "$out") == 2 ]] || { echo "FAIL want 2 menus (login + tm), got $(menus "$out")"; fail=1; }
 
-for key in 'x\r' '\r' '\x03' '\x04'; do
+for key in 'x\r' '\x03' '\x04'; do
   # shellcheck disable=SC2016  # the print line runs in the test shell, not here
   out=$(login --step 'expect:> ' --step "send:$key" --step 'expect:PROMPT> ' \
     --step 'send:print -r -- "E=$EDITOR L=$LANG W=$(whence -w tm) H=${precmd_functions[(r)_dotfiles_rc_maybe_reload]}"\r' \
@@ -85,10 +86,10 @@ out=$(login --step 'expect:> ' --step 'send:z\r' --step 'expect:Invalid choice' 
   --step 'expect:PROMPT> ' --step 'send:exit 0\r' --step eof)
 check 'invalid choices ask again' "$out" '^EXIT=0$'
 
-for key in e E; do
+for key in q Q ''; do
   out=$(login --step 'expect:> ' --step "send:$key\r" --step 'expect:\[work\]' --step 'sleep:0.5' --step 'send:\x02d' \
     --step 'expect:detached \(from session work\)' --step 'expect:PROMPT> ' --step 'send:exit 0\r' --step eof)
-  check "letter $key attaches session 3" "$out" '^EXIT=0$'
+  check "key '$key' attaches session 1" "$out" '^EXIT=0$'
 done
 
 out=$(login --step 'expect:> ' --step 'send:n\r' --step 'expect:Session name' --step 'send:work\r' \
@@ -108,9 +109,17 @@ out=$(login --step 'expect:> ' --step 'send:n\r' --step 'expect:Session name' --
 check 'n with a blank name gets an auto name' "$out" '^EXIT=0$'
 st "$TM" -S "$S" list-sessions -F '#S' | grep -E '^[0-9]+$' | while read -r n; do st "$TM" -S "$S" kill-session -t "=$n"; done
 
-out=$(login "${NOLANG[@]}" --step 'expect:1/q\) café' --step 'expect:> ' --step 'send:1\r' --step 'expect:\[café\]' \
+out=$(login "${NOLANG[@]}" --step 'expect:2/w\) café' --step 'expect:> ' --step 'send:2\r' --step 'expect:\[café\]' \
   --step 'sleep:0.5' --step 'send:\x02d' --step 'expect:detached' --step 'expect:PROMPT> ' --step 'send:exit 0\r' --step eof)
 check 'UTF-8 when the client sends no locale' "$out" '^EXIT=0$' '!caf_'
+
+# session_last_attached counts seconds, so the switch waits more than 1s
+out=$(login --step 'expect:3/e\) my notes' --step 'expect:> ' --step 'send:e\r' --step 'expect:\[my notes\]' \
+  --step 'sleep:1.1' --step "run:'$TM' -S '$S' switch-client -t =work" --step 'expect:\[work\]' --step 'sleep:0.5' \
+  --step 'send:\x02d' --step 'expect:detached \(from session work\)' --step 'expect:PROMPT> ' --step 'send:tm\r' \
+  --step 'expect:3/e\) café' --step 'expect:> ' --step 'send:x\r' --step 'expect:PROMPT> ' --step 'send:exit 0\r' --step eof)
+check 'the last seen session comes first, also after switch-client' "$out" '^EXIT=0$' \
+  '^  1/q\) work  \[2 win\]$' '^  2/w\) my notes  \[1 win\]$'
 
 out=$(login --env TERM=xterm-bogus --step 'expect:unsuitable terminal: xterm-bogus' --step 'expect:> ' \
   --step 'send:x\r' --step 'expect:PROMPT> ' --step 'send:exit 0\r' --step eof)
@@ -129,8 +138,8 @@ check 'zsh -l (IDE, script): no menu' "$out" '^EXIT=0$' '!tmux sessions:'
 out=$(login --env "ZDOTDIR=$R/.tmp/zdot-off" --step 'expect:PROMPT> ' --step 'send:exit 0\r' --step eof)
 check 'DOTFILES_TMUX_MENU=0 above the block in ~/.zshrc' "$out" '^EXIT=0$' '!tmux sessions:'
 
-out=$(login --step 'expect:3/e\) work' --step 'expect:> ' --step "run:'$TM' -S '$S' kill-session -t =work" \
-  --step 'send:e\r' --step "expect:can't find session" --step 'expect:PROMPT> ' --step 'send:exit 0\r' --step eof)
+out=$(login --step 'expect:1/q\) work' --step 'expect:> ' --step "run:'$TM' -S '$S' kill-session -t =work" \
+  --step 'send:q\r' --step "expect:can't find session" --step 'expect:PROMPT> ' --step 'send:exit 0\r' --step eof)
 check 'a session that is gone' "$out" '^EXIT=0$'
 
 exit $fail

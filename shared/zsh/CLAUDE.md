@@ -29,4 +29,5 @@ The last block of `shared/zsh/shared.zshrc` runs `tm` from `shared/zsh/tmux-menu
 
 - `$ZSH_ARGZERO` starts with `-` only in a login shell started by sshd or `login`. IDEs and scripts run `zsh -l`, which gives `/bin/zsh`, so they get no menu.
 - `tm` runs tmux in the login shell itself, so job control works: `C-b C-z` suspends the client and `fg` brings it back.
+- The menu lists sessions by `session_last_attached`, newest first, so a `switch-client` counts too. Enter attaches the first one. The time has 1s steps, so a test that checks the order waits more than 1s between attaches.
 - We expect at most 10 sessions for now. Sessions 1-10 get a number and a letter (`1/q` … `0/p`), and session 11 and later get only a number. The tests use 3 sessions and do not cover more than 10.
