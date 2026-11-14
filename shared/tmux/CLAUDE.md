@@ -16,7 +16,7 @@ After a change to a key binding in `tmux.conf`, or to `tm` in `shared/zsh/tmux-m
 
 Content rules:
 
-- Only vital keys. When a new row does not fit, drop a less useful row.
+- Only vital keys. When a new row does not fit, do not drop a row on your own. List 2–3 rows that could go, and ask the user which one to drop.
 - A key from `tmux.conf` or the zsh config, not from stock tmux, gets the `mine` class and shows yellow. The header note "yellow keys are your own" explains it.
 - No `tmux.conf` section, no pane border section, no legend for `C-x` / `M-x` / `‹name›`, no config path.
 
